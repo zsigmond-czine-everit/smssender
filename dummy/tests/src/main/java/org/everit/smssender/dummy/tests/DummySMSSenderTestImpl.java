@@ -27,7 +27,7 @@ import java.util.List;
 
 import junit.framework.Assert;
 
-import org.everit.smssender.api.enums.MessageFormat;
+import org.everit.smssender.api.MessageFormat;
 import org.everit.smssender.dummy.core.api.DummySMSSender;
 import org.everit.smssender.dummy.core.api.dto.DummySMS;
 
@@ -63,9 +63,9 @@ public class DummySMSSenderTestImpl implements DummySMSSenderTest {
                             null),
                     new DummySMS("234", "10", "454876432158", "", "TEST MESSAGE", MessageFormat.GSM_03_38, false,
                             null),
-                    new DummySMS("123", "450", "454876432158", "", "TEST MESSAGE", MessageFormat.UNICODE, true,
+                    new DummySMS("123", "450", "454876432158", null, "TEST MESSAGE", MessageFormat.UNICODE, true,
                             null),
-                    new DummySMS("06", "234", "454876432158", "", "TEST MESSAGE", MessageFormat.BINARY, true,
+                    new DummySMS("06", "234", "454876432158", null, "TEST MESSAGE", MessageFormat.BINARY, true,
                             null),
                     new DummySMS("06", "70", "454876432158", "", "TEST MESSAGE", MessageFormat.UNICODE, false,
                             null),
@@ -99,6 +99,98 @@ public class DummySMSSenderTestImpl implements DummySMSSenderTest {
      */
     private DummySMSSender dummySMSSender;
 
+    /**
+     * Test the getDummySMSs methods errors.
+     */
+    private void internalTestGetDummySMSsErrors() {
+        try {
+            dummySMSSender.getDummySMSs(null, "", "", "");
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.getDummySMSs("", null, "", "");
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.getDummySMSs("", "", null, "");
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+    }
+
+    /**
+     * Test the getLatestDummySMS methods errors.
+     */
+    private void internalTestGetLatestDummySMSErrors() {
+        try {
+            dummySMSSender.getLatestDummySMS(null, "", "", "");
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.getLatestDummySMS("", null, "", "");
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.getLatestDummySMS("", "", null, "");
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+    }
+
+    /**
+     * Test the sendMessage methods errors.
+     */
+    private void internalTestSendMessageErrors() {
+        try {
+            dummySMSSender.sendMessage(null, "", "", "", "", MessageFormat.UNICODE, true);
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.sendMessage("", null, "", "", "", MessageFormat.UNICODE, true);
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.sendMessage("", "", null, "", "", MessageFormat.UNICODE, true);
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.sendMessage("", "", "", "", null, MessageFormat.UNICODE, true);
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+
+        try {
+            dummySMSSender.sendMessage("", "", "", "", "", null, true);
+            Assert.fail("Expect IllegalArgumentException, but the method not throw.");
+        } catch (IllegalArgumentException e) {
+            Assert.assertNotNull(e);
+        }
+    }
+
     public void setDummySMSSender(final DummySMSSender dummySMSSender) {
         this.dummySMSSender = dummySMSSender;
     }
@@ -125,7 +217,6 @@ public class DummySMSSenderTestImpl implements DummySMSSenderTest {
         Assert.assertNull(lastDummySMSes);
         int sendMessagesNumber = 0;
         for (DummySMS ds : NOT_SEND_DUMMY_MESSAGES) {
-
             dummySMSSender.sendMessage(ds.getCountryCallCode(), ds.getAreaCall(), ds.getSubscriberNumber(),
                     ds.getExtensionNumber(), ds.getMessage(), ds.getMessageFormat(), ds.isSynchron());
             sendMessagesNumber++;
@@ -174,5 +265,17 @@ public class DummySMSSenderTestImpl implements DummySMSSenderTest {
 
         Assert.assertTrue(dummySMSes.get(0).getSendDate().getTime() < dummySMSes.get(dummySMSes.size() - 1)
                 .getSendDate().getTime());
+
+        for (DummySMS ds : NOT_SEND_DUMMY_MESSAGES) {
+            for (DummySMS nsds : NOT_SEND_DUMMY_MESSAGES) {
+                dummySMSSender.sendMessage(nsds.getCountryCallCode(), nsds.getAreaCall(), nsds.getSubscriberNumber(),
+                        nsds.getExtensionNumber(), nsds.getMessage(), nsds.getMessageFormat(), nsds.isSynchron());
+                Assert.assertNotNull(ds);
+            }
+        }
+        Assert.assertTrue(dummySMSSender.getDummySMSs().size() == 100);
+        internalTestGetDummySMSsErrors();
+        internalTestGetLatestDummySMSErrors();
+        internalTestSendMessageErrors();
     }
 }

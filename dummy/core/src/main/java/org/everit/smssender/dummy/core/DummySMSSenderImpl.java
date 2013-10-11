@@ -25,8 +25,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.everit.smssender.api.enums.MessageFormat;
+import org.everit.smssender.api.MessageFormat;
 import org.everit.smssender.dummy.core.api.DummySMSSender;
 import org.everit.smssender.dummy.core.api.dto.DummySMS;
 
@@ -36,58 +38,110 @@ import org.everit.smssender.dummy.core.api.dto.DummySMS;
 public class DummySMSSenderImpl implements DummySMSSender {
 
     /**
+     * The maximum stored SMS.
+     */
+    private int maxStoredSMS = 100;
+
+    /**
      * The list which contains all dummy SMSs.
      */
     private static List<DummySMS> dummySMSs = new ArrayList<DummySMS>();
 
+    /**
+     * The {@link ReentrantReadWriteLock} instance.
+     */
+    private ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+    /**
+     * The Lock which use the read.
+     */
+    private final Lock readLock = readWriteLock.readLock();
+
+    /**
+     * The Lock which use the write.
+     */
+    private final Lock writeLock = readWriteLock.writeLock();
+
     @Override
     public List<DummySMS> getDummySMSs() {
-        Collections.sort(dummySMSs);
-        return dummySMSs;
+        readLock.lock();
+        try {
+            Collections.sort(dummySMSs);
+            return dummySMSs;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
     public List<DummySMS> getDummySMSs(final String countryCallCode, final String areaCall,
             final String subscriberNumber,
             final String extension) {
-        List<DummySMS> result = new ArrayList<DummySMS>();
-        for (DummySMS ds : dummySMSs) {
-            if (ds.getCountryCallCode().equals(countryCallCode)
-                    && ds.getAreaCall().equals(areaCall)
-                    && ds.getSubscriberNumber().equals(subscriberNumber)
-                    && ds.getExtensionNumber().equals(extension)) {
-                result.add(ds);
-            }
+        if ((countryCallCode == null) || (areaCall == null) || (subscriberNumber == null)) {
+            throw new IllegalArgumentException("The countryCallCode or areaCall or "
+                    + "subscriberNumber parameter is null. Cannot be null.");
         }
-        return result;
+        readLock.lock();
+        try {
+            List<DummySMS> result = new ArrayList<DummySMS>();
+            for (DummySMS ds : dummySMSs) {
+                if (ds.getCountryCallCode().equals(countryCallCode)
+                        && ds.getAreaCall().equals(areaCall)
+                        && ds.getSubscriberNumber().equals(subscriberNumber)
+                        && (ds.getExtensionNumber() != null)
+                        && (((ds.getExtensionNumber() != null) && (extension != null) && (ds.getExtensionNumber()
+                                .equals(extension))) || ((ds.getExtensionNumber() == null) && (extension == null)))) {
+                    result.add(ds);
+                }
+            }
+            return result;
+        } finally {
+            readLock.unlock();
+        }
     }
 
     @Override
     public DummySMS getLatestDummySMS() {
-        if (dummySMSs.size() > 0) {
-            Collections.sort(dummySMSs);
-            return dummySMSs.get(dummySMSs.size() - 1);
+        readLock.lock();
+        try {
+            DummySMS result = null;
+            if (dummySMSs.size() > 0) {
+                Collections.sort(dummySMSs);
+                result = dummySMSs.get(dummySMSs.size() - 1);
+            }
+            return result;
+        } finally {
+            readLock.unlock();
         }
-        return null;
     }
 
     @Override
     public DummySMS getLatestDummySMS(final String countryCallCode, final String areaCall,
             final String subscriberNumber, final String extension) {
-        List<DummySMS> correctSMSes = new ArrayList<DummySMS>();
-        for (DummySMS ds : dummySMSs) {
-            if (ds.getCountryCallCode().equals(countryCallCode)
-                    && ds.getAreaCall().equals(areaCall)
-                    && ds.getSubscriberNumber().equals(subscriberNumber)
-                    && ds.getExtensionNumber().equals(extension)) {
-                correctSMSes.add(ds);
+        if ((countryCallCode == null) || (areaCall == null) || (subscriberNumber == null)) {
+            throw new IllegalArgumentException(
+                    "The countryCallCode or areaCall or subscriberNumber parameter is null. Cannot be null.");
+        }
+        readLock.lock();
+        try {
+            List<DummySMS> correctSMSes = new ArrayList<DummySMS>();
+            for (DummySMS ds : dummySMSs) {
+                if (ds.getCountryCallCode().equals(countryCallCode)
+                        && ds.getAreaCall().equals(areaCall)
+                        && ds.getSubscriberNumber().equals(subscriberNumber)
+                        && (((ds.getExtensionNumber() != null) && (extension != null) && (ds.getExtensionNumber()
+                                .equals(extension))) || ((ds.getExtensionNumber() == null) && (extension == null)))) {
+                    correctSMSes.add(ds);
+                }
             }
+            if (correctSMSes.size() > 0) {
+                Collections.sort(correctSMSes);
+                return correctSMSes.get(correctSMSes.size() - 1);
+            }
+            return null;
+        } finally {
+            readLock.unlock();
         }
-        if (correctSMSes.size() > 0) {
-            Collections.sort(correctSMSes);
-            return correctSMSes.get(correctSMSes.size() - 1);
-        }
-        return null;
     }
 
     @Override
@@ -97,10 +151,27 @@ public class DummySMSSenderImpl implements DummySMSSender {
             final String message,
             final MessageFormat messageFormat,
             final boolean synchron) {
-        dummySMSs.add(new DummySMS(countryCallCode,
-                areaCall, subscriber, extension,
-                message, messageFormat, synchron,
-                new Date()));
+        if ((countryCallCode == null) || (areaCall == null) || (subscriber == null)
+                || (message == null) || (messageFormat == null)) {
+            throw new IllegalArgumentException("The countryCallCode or areaCall or subscriberNumber or "
+                    + "message or messageFormat parameter is null. Cannot be null.");
+        }
+        writeLock.lock();
+        try {
+            if (dummySMSs.size() >= maxStoredSMS) {
+                dummySMSs.remove(0);
+            }
+            dummySMSs.add(new DummySMS(countryCallCode,
+                    areaCall, subscriber, extension,
+                    message, messageFormat, synchron,
+                    new Date()));
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
+    public void setMaxStoredSMS(final int maxStoredSMS) {
+        this.maxStoredSMS = maxStoredSMS;
     }
 
 }

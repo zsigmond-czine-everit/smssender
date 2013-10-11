@@ -23,7 +23,7 @@ package org.everit.smssender.dummy.core.api.dto;
 
 import java.util.Date;
 
-import org.everit.smssender.api.enums.MessageFormat;
+import org.everit.smssender.api.MessageFormat;
 
 /**
  * Information of the dummy SMS.
@@ -126,11 +126,13 @@ public final class DummySMS implements Comparable<DummySMS> {
         }
         DummySMS dummyObj = (DummySMS) obj;
 
-        if (dummyObj.getAreaCall().equals(getAreaCall())
-                && dummyObj.getCountryCallCode().equals(getCountryCallCode())
-                && dummyObj.getExtensionNumber().equals(getExtensionNumber())
-                && dummyObj.getMessage().equals(getMessage())
-                && dummyObj.getSubscriberNumber().equals(getSubscriberNumber())
+        if ((dummyObj.getAreaCall().equals(getAreaCall()))
+                && (dummyObj.getCountryCallCode().equals(getCountryCallCode()))
+                && (((dummyObj.getExtensionNumber() != null) && (getExtensionNumber() != null)
+                && dummyObj.getExtensionNumber().equals(getExtensionNumber()))
+                || ((getExtensionNumber() == null) && (dummyObj.getExtensionNumber() == null)))
+                && (dummyObj.getMessage().equals(getMessage()))
+                && (dummyObj.getSubscriberNumber().equals(getSubscriberNumber()))
                 && (dummyObj.getMessageFormat() == getMessageFormat())
                 && (dummyObj.isSynchron() == isSynchron())) {
             return true;
@@ -172,6 +174,11 @@ public final class DummySMS implements Comparable<DummySMS> {
 
     public String getSubscriberNumber() {
         return subscriberNumber;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 
     public boolean isSynchron() {

@@ -43,14 +43,17 @@ public interface DummySMSSender extends SMSSender {
      * Get all DummySMSs which corresponds to the parameters.
      * 
      * @param countryCallCode
-     *            the country call code.
+     *            the country call code. Cannot be <code>null</code>.
      * @param areaCall
-     *            the area code.
+     *            the area code. Cannot be <code>null</code>.
      * @param subscriberNumber
-     *            the number of the subscriber.
+     *            the number of the subscriber. Cannot be <code>null</code>.
      * @param extension
      *            the number of the extension.
      * @return the DummySMSs which corresponds to the parameters. If no one return empty list.
+     * 
+     * @throws IllegalArgumentException
+     *             if the countryCallCode or areaCall or subscriberNumber parameter is <code>null</code>.
      */
     List<DummySMS> getDummySMSs(final String countryCallCode, final String areaCall,
             final String subscriberNumber, final String extension);
@@ -66,14 +69,17 @@ public interface DummySMSSender extends SMSSender {
      * Get latest DummySMS which corresponds to the parameters.
      * 
      * @param countryCallCode
-     *            the country call code.
+     *            the country call code. Cannot be <code>null</code>.
      * @param areaCall
-     *            the area code.
+     *            the area code. Cannot be <code>null</code>.
      * @param subscriberNumber
-     *            the number of the subscriber.
+     *            the number of the subscriber. Cannot be <code>null</code>.
      * @param extension
      *            the number of the extension.
      * @return the latest dummy SMS which corresponds to the parameters. If no one return <code>null</code>.
+     * 
+     * @throws IllegalArgumentException
+     *             if the countryCallCode or areaCall or subscriberNumber parameter is <code>null</code>.
      */
     DummySMS getLatestDummySMS(final String countryCallCode, final String areaCall,
             final String subscriberNumber, final String extension);

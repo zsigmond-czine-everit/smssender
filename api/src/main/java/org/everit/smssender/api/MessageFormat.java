@@ -1,4 +1,4 @@
-package org.everit.smssender.api.enums;
+package org.everit.smssender.api;
 
 /*
  * Copyright (c) 2011, Everit Kft.

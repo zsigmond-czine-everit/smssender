@@ -23,18 +23,26 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:jpa="http://aries.apache.org/xmlns/jpa/v1.1.0"
     xmlns:tx="http://aries.apache.org/xmlns/transactions/v1.1.0">
 
-    <bean id="dummySMSSenderImpl" class="org.everit.smssender.dummy.core.DummySMSSenderImpl"/>
+    <bean id="dummySMSSenderImpl" class="org.everit.smssender.dummy.core.DummySMSSenderImpl">
+<!--         <property name="maxStoredSMS" value="100" /> -->
+    </bean>
 
-    <service interface="org.everit.smssender.dummy.core.api.DummySMSSender" ref="dummySMSSenderImpl">
-       <service-properties>
-			<entry key="smsprovider" value="dummy" />
-		</service-properties>
+    <service ref="dummySMSSenderImpl">
+        <interfaces>
+            <value>org.everit.smssender.api.SMSSender</value>
+            <value>org.everit.smssender.dummy.core.api.DummySMSSender</value>
+        </interfaces>
     </service>
-    
-    <service interface="org.everit.smssender.api.SMSSender" ref="dummySMSSenderImpl">
-       <service-properties>
-            <entry key="smsprovider" value="dummy" />
-        </service-properties>
-    </service>
+<!--     <service interface="org.everit.smssender.dummy.core.api.DummySMSSender" ref="dummySMSSenderImpl"> -->
+<!--         <service-properties> -->
+<!--             <entry key="smsprovider" value="dummy" /> -->
+<!--         </service-properties> -->
+<!--     </service> -->
+
+<!--     <service interface="org.everit.smssender.api.SMSSender" ref="dummySMSSenderImpl"> -->
+<!--         <service-properties> -->
+<!--             <entry key="smsprovider" value="dummy" /> -->
+<!--         </service-properties> -->
+<!--     </service> -->
 
 </blueprint>

@@ -21,8 +21,6 @@ package org.everit.smssender.api;
  * MA 02110-1301  USA
  */
 
-import org.everit.smssender.api.enums.MessageFormat;
-
 /**
  * Service interface for the SMSSender service.
  */
@@ -32,19 +30,22 @@ public interface SMSSender {
      * Send messages to the phone number.
      * 
      * @param countryCallCode
-     *            the country call code.
+     *            the country call code. Cannot be <code>null</code>.
      * @param areaCall
-     *            the area call code.
+     *            the area call code. Cannot be <code>null</code>.
      * @param subscriber
-     *            the number of the subscriber.
+     *            the number of the subscriber. Cannot be <code>null</code>.
      * @param extension
      *            the extension number.
      * @param message
-     *            the message.
+     *            the message. Cannot be <code>null</code>.
      * @param messageFormat
-     *            the message format.
+     *            the message format. Cannot be <code>null</code>.
      * @param synchron
-     *            //TODO what mean?
+     *            Synchron or not.
+     * 
+     * @throws IllegalArgumentException
+     *             if the countryCallCode or areaCall or subscriberNumber or message or messageFormat parameter is null
      */
     void sendMessage(final String countryCallCode, final String areaCall,
             final String subscriber,

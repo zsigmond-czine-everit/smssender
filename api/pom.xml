@@ -51,8 +51,7 @@
                             *
                         </Import-Package>
                         <Export-Package>
-                            ${project.artifactId},
-                            ${project.artifactId}.enums,
+                            ${project.artifactId}
                         </Export-Package>
                     </instructions>
                 </configuration>
