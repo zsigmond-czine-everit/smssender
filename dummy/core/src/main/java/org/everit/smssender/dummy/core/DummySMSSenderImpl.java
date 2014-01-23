@@ -84,13 +84,32 @@ public class DummySMSSenderImpl implements DummySMSSender {
         readLock.lock();
         try {
             List<DummySMS> result = new ArrayList<DummySMS>();
+            // for (DummySMS ds : dummySMSs) {
+            // if (ds.getCountryCallCode().equals(countryCallCode)
+            // && ds.getAreaCall().equals(areaCall)
+            // && ds.getSubscriberNumber().equals(subscriberNumber)
+            // && (ds.getExtensionNumber() != null)
+            // && ((ds.getExtensionNumber().equals(extension)) || ((ds
+            // .getExtensionNumber() == null) && (extension == null)))) {
+            // result.add(ds);
+            // }
+            // }
+
+            // for (DummySMS ds : dummySMSs) {
+            // if (isEquals(ds.getCountryCallCode(), countryCallCode)
+            // && isEquals(ds.getAreaCall(), areaCall)
+            // && isEquals(ds.getSubscriberNumber(), subscriberNumber)
+            // && (ds.getExtensionNumber() != null)
+            // && (isEquals(ds.getExtensionNumber(), extension) ||
+            // ((ds.getExtensionNumber() == null) && (extension == null)))) {
+            // result.add(ds);
+            // }
+            // }
             for (DummySMS ds : dummySMSs) {
-                if (ds.getCountryCallCode().equals(countryCallCode)
-                        && ds.getAreaCall().equals(areaCall)
-                        && ds.getSubscriberNumber().equals(subscriberNumber)
-                        && (ds.getExtensionNumber() != null)
-                        && (((ds.getExtensionNumber() != null) && (extension != null) && (ds.getExtensionNumber()
-                                .equals(extension))) || ((ds.getExtensionNumber() == null) && (extension == null)))) {
+                String dsConcat = ds.getCountryCallCode() + ds.getAreaCall() + ds.getSubscriberNumber()
+                        + ds.getExtensionNumber();
+                String paramConcat = countryCallCode + areaCall + subscriberNumber + extension;
+                if (dsConcat.hashCode() == paramConcat.hashCode()) {
                     result.add(ds);
                 }
             }
@@ -142,6 +161,24 @@ public class DummySMSSenderImpl implements DummySMSSender {
         } finally {
             readLock.unlock();
         }
+    }
+
+    /**
+     * Checking the values is equals or not.
+     * 
+     * @param originalValue
+     *            the original value.
+     * @param comparableValue
+     *            the comparable value.
+     * @return <code>true</code> if equals the two value, otherwise false.
+     */
+    private boolean isEquals(final String originalValue, final String comparableValue) {
+        boolean equals = false;
+        if (originalValue != null) {
+            equals = originalValue.equals(comparableValue);
+        }
+
+        return equals;
     }
 
     @Override
